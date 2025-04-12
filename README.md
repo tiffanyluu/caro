@@ -1,1 +1,23 @@
-# webpack-template
+# Caro
+
+**Caro** is a digital version of a traditional Vietnamese strategy game.
+
+An important feature of **Caro** is the **Overline Rule**, which states that the winning line must not be blocked at both ends. If both ends of a player's line are blocked by the opponent, the line is not considered a valid win.
+
+<p align="center">
+  <img src=".caro.jpg"/>
+</p>
+
+## Features
+
+- **Responsive grid**
+- **Overline Rule**
+- **Two-player mode**
+- **AI opponent**: Challenge an AI using the **Minimax** algorithm with **Alpha-Beta Pruning**. (In Progress)
+
+## How to Play
+
+1. The game starts with an empty grid.
+2. Players take turns placing their marks (`X` or `O`) on the grid.
+3. The first player to align five (or more) marks in a row, horizontally, vertically, or diagonally, wins the game.
+4. If both ends of a line are blocked by the opponent, the line is not considered a valid win.
