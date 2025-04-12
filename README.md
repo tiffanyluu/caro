@@ -5,7 +5,7 @@
 An important feature of **Caro** is the **Overline Rule**, which states that the winning line must not be blocked at both ends. If both ends of a player's line are blocked by the opponent, the line is not considered a valid win.
 
 <p align="center">
-  <img src=".caro.jpg"/>
+  <img src="./src/assets/caro.png"/>
 </p>
 
 ## Features
