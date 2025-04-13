@@ -2,16 +2,16 @@
 
 **Caro** is a digital version of a traditional Vietnamese strategy game.
 
-An important feature of **Caro** is the **Overline Rule**, which states that the winning line must not be blocked at both ends. If both ends of a player's line are blocked by the opponent, the line is not considered a valid win.
+An important feature of **Caro** states that the winning line must not be blocked at both ends. If both ends of a player's line are blocked by the opponent, the line is not considered a valid win.
 
 <p align="center">
   <img src="./src/assets/caro.png"/>
 </p>
+Background Image Credit: [Lukas Blazek @goumbik on Unsplash](https://unsplash.com/@goumbik)
 
 ## Features
 
 - **Responsive grid**
-- **Overline Rule**
 - **Two-player mode**
 - **AI opponent**: Challenge an AI using the **Minimax** algorithm with **Alpha-Beta Pruning**. (In Progress)
 

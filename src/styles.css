@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Indie+Flower&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
-/* Image credits: Lukas Blazek, @goumbik on Unsplash*/
+
 * {
   margin: 0;
   padding: 0;
@@ -16,6 +16,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  font-family: "Gloria Hallelujah", cursive;
 }
 
 .container {
@@ -35,6 +36,52 @@ body {
   font-size: clamp(3rem, 8vmin, 6rem);
   font-weight: bold;
   margin-bottom: 2vh;
+}
+
+.mode-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 999;
+}
+
+.mode-container.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 30px;
+}
+
+.pvpButton {
+  font-size: clamp(1rem, 3vmin, 1.5rem);
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 20px;
+  background-color: cyan;
+  font-family: "Gloria Hallelujah", cursive;
+}
+
+.pvaiButton {
+  font-size: clamp(1rem, 3vmin, 1.5rem);
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 20px;
+  background-color: rgb(255, 92, 74);
+  font-family: "Gloria Hallelujah", cursive;
 }
 
 .grid-container {
@@ -64,7 +111,7 @@ body {
   opacity: 1;
 }
 
-div[class^="cell-"] {
+.cell {
   display: flex;
   border: 1px solid lightblue;
   background-color: white;
@@ -77,7 +124,7 @@ div[class^="cell-"] {
   font-family: "Indie Flower";
 }
 
-div[class^="cell-"]:hover {
+.cell:hover {
   background-color: rgb(196, 196, 196);
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -134,4 +181,5 @@ div[class^="cell-"]:hover {
   border-radius: 16px;
   padding: 12px 20px;
   background-color: lightpink;
+  font-family: "Gloria Hallelujah", cursive;
 }

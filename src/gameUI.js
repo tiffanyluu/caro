@@ -1,4 +1,54 @@
-import { setCoords, resetGame, makeMove } from "./gameLogic.js";
+import { setCoords, resetGame, makeMove, game } from "./gameLogic.js";
+import { makeSimulatedMove } from "./ai.js";
+
+let isPlayerVsAI = false;
+
+function toggleGameMode(mode) {
+  isPlayerVsAI = mode === "AI";
+  resetGame();
+  initializeBoard();
+}
+
+function showModeSelector() {
+  const selector = createGameModeUI((mode) => {
+    toggleGameMode(mode);
+  });
+  document.body.appendChild(selector);
+  setTimeout(() => selector.classList.add("show"), 50);
+}
+
+function createGameModeUI(onSelect) {
+  const modeContainer = document.createElement("div");
+  modeContainer.className = "mode-container";
+
+  const modeSelector = document.createElement("div");
+  modeSelector.className = "mode-selector";
+
+  const pvpButton = document.createElement("button");
+  pvpButton.className = "pvpButton";
+  pvpButton.textContent = "Player vs Player";
+  pvpButton.onclick = () => {
+    onSelect("PVP");
+    modeContainer.classList.remove("show");
+    modeContainer.remove();
+  };
+
+  const pvaiButton = document.createElement("button");
+  pvaiButton.className = "pvaiButton";
+  pvaiButton.textContent = "Player vs AI";
+  pvaiButton.onclick = () => {
+    onSelect("AI");
+    modeContainer.classList.remove("show");
+    modeContainer.remove();
+  };
+
+  modeSelector.appendChild(pvpButton);
+  modeSelector.appendChild(pvaiButton);
+  modeContainer.appendChild(modeSelector);
+
+  return modeContainer;
+}
+
 function createEndingContent(message) {
   let endingContainer = document.querySelector(".ending-container");
   endingContainer.innerHTML = "";
@@ -26,8 +76,10 @@ function createEndingContent(message) {
 }
 
 function showWinningScreen(winner) {
-  let message = `${winner} is the winner!`;
-  createEndingContent(message);
+  setTimeout(() => {
+    let message = `${winner} is the winner!`;
+    createEndingContent(message);
+  }, 2000);
 }
 
 function showDrawScreen() {
@@ -42,7 +94,8 @@ function updateCell(row, col, marker) {
 }
 
 function handleCellClick() {
-  const result = makeMove();
+  const marker = isPlayerVsAI ? "X" : undefined;
+  const result = makeMove(undefined, undefined, marker);
 
   if (!result.success) {
     alert(result.error);
@@ -56,6 +109,32 @@ function handleCellClick() {
       showDrawScreen();
     } else {
       showWinningScreen(result.winner);
+    }
+  } else {
+    if (isPlayerVsAI) {
+      setTimeout(() => aiMove(result.currentBoard), 500);
+    }
+  }
+}
+
+function aiMove(currentBoard) {
+  let simulatedMove = makeSimulatedMove(currentBoard, "O");
+
+  if (simulatedMove) {
+    const [row, col] = simulatedMove;
+    setCoords(row, col);
+    const result = makeMove(row, col, "O");
+
+    if (result.success) {
+      updateCell(row, col, "O");
+
+      if (result.isGameOver) {
+        if (result.isDraw) {
+          showDrawScreen();
+        } else {
+          showWinningScreen(result.winner);
+        }
+      }
     }
   }
 }
@@ -71,6 +150,7 @@ function restart() {
 
   resetGame();
   initializeBoard();
+  showModeSelector();
 }
 
 function initializeBoard() {
@@ -80,7 +160,7 @@ function initializeBoard() {
   for (let i = 0; i < 15; i++) {
     for (let j = 0; j < 15; j++) {
       const cell = document.createElement("div");
-      cell.className = `cell-${i}${j}`;
+      cell.className = `cell cell-${i}${j}`;
       cell.dataset.row = i;
       cell.dataset.col = j;
 
@@ -94,7 +174,11 @@ function initializeBoard() {
 }
 
 function setUpEventListeners() {
-  document.addEventListener("DOMContentLoaded", initializeBoard);
+  document.addEventListener("DOMContentLoaded", () => {
+    initializeBoard();
+    createGameModeUI();
+    showModeSelector();
+  });
 }
 
-export { initializeBoard, setUpEventListeners };
+export { initializeBoard, setUpEventListeners, toggleGameMode };

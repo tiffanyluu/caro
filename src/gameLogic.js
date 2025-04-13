@@ -28,33 +28,44 @@ function resetGame() {
   game.isGameOver = false;
 }
 
-function makeMove() {
+function makeMove(row, col, playerMarker) {
   if (game.isGameOver) {
     return { success: false, error: "Game is over." };
   }
-  if (game.row === undefined || game.col === undefined) {
+
+  const moveRow = row !== undefined ? row : game.row;
+  const moveCol = col !== undefined ? col : game.col;
+
+  if (moveRow === undefined || moveCol === undefined) {
     return { success: false, error: "Invalid cell" };
   }
 
-  const currentCell = boardValue(game.row, game.col);
+  const currentCell = boardValue(moveRow, moveCol);
   if (currentCell !== "") {
     return { success: false, error: "Pick an unoccupied cell." };
   }
 
-  const marker = game.player1Turn
-    ? game.players.player1Choice
-    : game.players.player2Choice;
-  game.board[game.row][game.col] = marker;
-  game.player1Turn = !game.player1Turn;
+  const marker =
+    playerMarker ||
+    (game.player1Turn
+      ? game.players.player1Choice
+      : game.players.player2Choice);
 
-  const isWinner = checkState(game.row, game.col, marker);
+  game.board[moveRow][moveCol] = marker;
+
+  if (!playerMarker) {
+    game.player1Turn = !game.player1Turn;
+  }
+
+  const isWinner = checkState(moveRow, moveCol, marker);
   const isDraw = checkDraw();
   game.isGameOver = isDraw || isWinner;
 
   return {
+    currentBoard: game.board,
     success: true,
     marker,
-    position: { row: game.row, col: game.col },
+    position: { row: moveRow, col: moveCol },
     isGameOver: isWinner || isDraw,
     winner: isWinner
       ? marker === game.players.player1Choice
@@ -139,4 +150,14 @@ function checkDraw() {
   return game.board.flat().every((cell) => cell !== "");
 }
 
-export { setCoords, resetGame, makeMove };
+export {
+  game,
+  boardValue,
+  setCoords,
+  resetGame,
+  makeMove,
+  checkState,
+  checkLine,
+  isValidPosition,
+  checkDraw,
+};
