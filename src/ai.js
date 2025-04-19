@@ -10,26 +10,33 @@ import {
   checkDraw,
 } from "./gameLogic.js";
 
+const boardCache = new Map();
+
 function evaluateBoard(board, player) {
   let totalScore = 0;
-  let opponent = getOpponent(player);
-  let directions = [
+  const opponent = getOpponent(player);
+  const directions = [
     [1, 0], // vertical
     [0, 1], // horizontal
     [1, 1], // diagonal \
     [1, -1], // diagonal /
   ];
-  let lineLength = 9;
 
   for (let row = 0; row < 15; row++) {
     for (let col = 0; col < 15; col++) {
       for (let [dx, dy] of directions) {
-        let line = extractLine(board, row, col, dx, dy, lineLength);
-        let playerPatterns = findPatterns(line, player);
-        let opponentPatterns = findPatterns(line, opponent);
-
-        totalScore += scorePatterns(playerPatterns);
-        totalScore -= scorePatterns(opponentPatterns);
+        let maxSteps = 6;
+        let line = [];
+        for (let i = 0; i < maxSteps; i++) {
+          let r = row + i * dy;
+          let c = col + i * dx;
+          if (!isValidPosition(r, c)) break;
+          line.push(board[r][c]);
+        }
+        if (line.length > 0) {
+          totalScore += fastPatternScore(line, player);
+          totalScore -= fastPatternScore(line, opponent);
+        }
       }
     }
   }
@@ -37,66 +44,37 @@ function evaluateBoard(board, player) {
   return totalScore;
 }
 
-function findPatterns(line, player) {
-  let patterns = {};
+function fastPatternScore(line, player) {
+  let score = 0;
   let i = 0;
 
   while (i < line.length) {
-    if (line[i] != player) {
-      i += 1;
+    if (line[i] !== player) {
+      i++;
       continue;
     }
+
     let start = i;
-    while (i < line.length && line[i] === player) {
-      i += 1;
-    }
+    while (i < line.length && line[i] === player) i++;
     let end = i - 1;
-    let runLength = end - start + 1;
+
+    let length = end - start + 1;
     let leftOpen = start > 0 && line[start - 1] === "";
     let rightOpen = end < line.length - 1 && line[end + 1] === "";
     let openEnds = (leftOpen ? 1 : 0) + (rightOpen ? 1 : 0);
 
-    let key = `${runLength},${openEnds}`;
-    if (!patterns[key]) {
-      patterns[key] = 1;
-    } else {
-      patterns[key] += 1;
-    }
+    if (length >= 5 && openEnds >= 1) score += 100000;
+    else if (length === 4 && openEnds === 2) score += 10000;
+    else if (length === 4 && openEnds === 1) score += 1000;
+    else if (length === 3 && openEnds === 2) score += 500;
+    else if (length === 3 && openEnds === 1) score += 100;
+    else if (length === 2 && openEnds === 2) score += 50;
+    else if (length === 2 && openEnds === 1) score += 25;
+    else if (length === 1 && openEnds === 2) score += 10;
+    else if (length === 1 && openEnds === 1) score += 5;
+    else score += 1;
   }
-  return Object.entries(patterns).map(([key, count]) => {
-    const [length, openEnds] = key.split(",").map(Number);
-    return [length, openEnds, count];
-  });
-}
 
-function scorePatterns(patterns) {
-  let score = 0;
-
-  for (let pattern of patterns) {
-    const [length, openEnds, count] = pattern;
-
-    if (length >= 5 && openEnds >= 1) {
-      score += 100000 * count;
-    } else if (length === 4 && openEnds === 2) {
-      score += 10000 * count;
-    } else if (length === 4 && openEnds === 1) {
-      score += 1000 * count;
-    } else if (length === 3 && openEnds === 2) {
-      score += 500 * count;
-    } else if (length === 3 && openEnds === 1) {
-      score += 100 * count;
-    } else if (length === 2 && openEnds === 2) {
-      score += 50 * count;
-    } else if (length === 2 && openEnds === 1) {
-      score += 25 * count;
-    } else if (length === 1 && openEnds === 2) {
-      score += 10 * count;
-    } else if (length === 1 && openEnds === 1) {
-      score += 5 * count;
-    } else {
-      score += 1 * count;
-    }
-  }
   return score;
 }
 
@@ -118,15 +96,15 @@ function getOpponent(player) {
   return player === "X" ? "O" : "X";
 }
 
-function generateMoves(board) {
+function generateMoves(board, player = null) {
   let validMoves = new Set();
 
   for (let row = 0; row < 15; row++) {
     for (let col = 0; col < 15; col++) {
       if (board[row][col] === "") {
         // Check 8 neighbors
-        for (let dx = -1; dx <= 1; dx++) {
-          for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          for (let dy = -2; dy <= 2; dy++) {
             if (dx === 0 && dy === 0) continue;
             let newRow = row + dx;
             let newCol = col + dy;
@@ -157,6 +135,16 @@ function generateMoves(board) {
       [6, 7],
       [7, 6],
     ];
+  }
+
+  if (player) {
+    moves.sort((a, b) => {
+      const boardA = copyBoard(board);
+      const boardB = copyBoard(board);
+      boardA[a[0]][a[1]] = player;
+      boardB[b[0]][b[1]] = player;
+      return evaluateBoard(boardB, player) - evaluateBoard(boardA, player);
+    });
   }
 
   return moves;
@@ -216,6 +204,11 @@ function checkWinnerForMinimax(board, player, opponent) {
 function minimax(board, depth, alpha, beta, isMaximizing, player) {
   const opponent = getOpponent(player);
   const winner = checkWinnerForMinimax(board, player, opponent);
+  const key = board.flat().join("") + isMaximizing;
+
+  if (boardCache.has(key)) {
+    return boardCache.get(key);
+  }
 
   if (winner === player) return 1000000;
   if (winner === opponent) return -1000000;
@@ -224,7 +217,10 @@ function minimax(board, depth, alpha, beta, isMaximizing, player) {
 
   let bestScore = isMaximizing ? -Infinity : Infinity;
 
-  for (const [row, col] of generateMoves(board)) {
+  for (const [row, col] of generateMoves(
+    board,
+    isMaximizing ? player : opponent
+  )) {
     const boardCopy = copyBoard(board);
     boardCopy[row][col] = isMaximizing ? player : opponent;
 
@@ -246,18 +242,30 @@ function minimax(board, depth, alpha, beta, isMaximizing, player) {
 
     if (beta <= alpha) break; // Prune
   }
+  boardCache.set(key, bestScore);
   return bestScore;
 }
 
 function makeSimulatedMove(board, aiMarker) {
+  boardCache.clear();
+
   let bestScore = -Infinity;
   let bestMove = null;
 
-  for (let [row, col] of generateMoves(board)) {
+  const isMaximizing = true;
+
+  for (const [row, col] of generateMoves(board, aiMarker)) {
     let boardCopy = copyBoard(board);
     boardCopy[row][col] = aiMarker;
 
-    let score = minimax(boardCopy, 2, -Infinity, Infinity, false, aiMarker);
+    let score = minimax(
+      boardCopy,
+      2,
+      -Infinity,
+      Infinity,
+      !isMaximizing,
+      aiMarker
+    );
 
     if (score > bestScore) {
       bestScore = score;
@@ -268,13 +276,12 @@ function makeSimulatedMove(board, aiMarker) {
 }
 
 function copyBoard(board) {
-  return structuredClone(board);
+  return board.map((row) => row.slice());
 }
 
 export {
   evaluateBoard,
-  findPatterns,
-  scorePatterns,
+  fastPatternScore,
   extractLine,
   getOpponent,
   generateMoves,

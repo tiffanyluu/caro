@@ -7,6 +7,7 @@ const game = {
   row: undefined,
   col: undefined,
   isGameOver: false,
+  isPlayerVsAI: false,
 };
 
 function boardValue(row, col) {
@@ -57,7 +58,8 @@ function makeMove(row, col, playerMarker) {
     game.player1Turn = !game.player1Turn;
   }
 
-  const isWinner = checkState(moveRow, moveCol, marker);
+  const winningLine = checkState(moveRow, moveCol, marker);
+  const isWinner = winningLine !== null;
   const isDraw = checkDraw();
   game.isGameOver = isDraw || isWinner;
 
@@ -70,41 +72,96 @@ function makeMove(row, col, playerMarker) {
     winner: isWinner
       ? marker === game.players.player1Choice
         ? "Player 1"
+        : game.isPlayerVsAI
+        ? "AI"
         : "Player 2"
       : null,
     isDraw,
+    winningLine: isWinner ? winningLine : [],
   };
 }
 
+// function checkState(row, col, marker) {
+//   let horizontalLeft = checkLine(row, col, marker, -1, 0);
+//   let horizontalRight = checkLine(row, col, marker, 1, 0);
+//   let totalHorizontal = horizontalLeft.count + horizontalRight.count - 1;
+//   let horizontalBlockedEnds =
+//     horizontalLeft.blockedEnds + horizontalRight.blockedEnds;
+//   if (totalHorizontal >= 5 && horizontalBlockedEnds < 2) return true;
+
+//   let verticalDown = checkLine(row, col, marker, 0, 1);
+//   let verticalUp = checkLine(row, col, marker, 0, -1);
+//   let totalVertical = verticalDown.count + verticalUp.count - 1;
+//   let verticalBlockedEnds = verticalDown.blockedEnds + verticalUp.blockedEnds;
+//   if (totalVertical >= 5 && verticalBlockedEnds < 2) return true;
+
+//   let diagonalDownRight = checkLine(row, col, marker, 1, 1);
+//   let diagonalUpLeft = checkLine(row, col, marker, -1, -1);
+//   let totalDiagonal = diagonalDownRight.count + diagonalUpLeft.count - 1;
+//   let diagonalBlockedEnds =
+//     diagonalDownRight.blockedEnds + diagonalUpLeft.blockedEnds;
+//   if (totalDiagonal >= 5 && diagonalBlockedEnds < 2) return true;
+
+//   let diagonalDownLeft = checkLine(row, col, marker, 1, -1);
+//   let diagonalUpRight = checkLine(row, col, marker, -1, 1);
+//   let totalAntiDiagonal = diagonalDownLeft.count + diagonalUpRight.count - 1;
+//   let antiDiagonalBlockedEnds =
+//     diagonalDownLeft.blockedEnds + diagonalUpRight.blockedEnds;
+//   if (totalAntiDiagonal >= 5 && antiDiagonalBlockedEnds < 2) return true;
+
+//   return false;
+// }
+
 function checkState(row, col, marker) {
-  let horizontalLeft = checkLine(row, col, marker, -1, 0);
-  let horizontalRight = checkLine(row, col, marker, 1, 0);
-  let totalHorizontal = horizontalLeft.count + horizontalRight.count - 1;
-  let horizontalBlockedEnds =
-    horizontalLeft.blockedEnds + horizontalRight.blockedEnds;
-  if (totalHorizontal >= 5 && horizontalBlockedEnds < 2) return true;
+  const directions = [
+    { dx: -1, dy: 0 }, // left
+    { dx: 1, dy: 0 }, // right
+    { dx: 0, dy: -1 }, // up
+    { dx: 0, dy: 1 }, // down
+    { dx: -1, dy: -1 }, // up-left
+    { dx: 1, dy: 1 }, // down-right
+    { dx: 1, dy: -1 }, // down-left
+    { dx: -1, dy: 1 }, // up-right
+  ];
 
-  let verticalDown = checkLine(row, col, marker, 0, 1);
-  let verticalUp = checkLine(row, col, marker, 0, -1);
-  let totalVertical = verticalDown.count + verticalUp.count - 1;
-  let verticalBlockedEnds = verticalDown.blockedEnds + verticalUp.blockedEnds;
-  if (totalVertical >= 5 && verticalBlockedEnds < 2) return true;
+  for (let i = 0; i < directions.length; i += 2) {
+    const d1 = directions[i];
+    const d2 = directions[i + 1];
+    const line1 = getLine(row, col, marker, d1.dx, d1.dy);
+    const line2 = getLine(row, col, marker, d2.dx, d2.dy);
+    const combined = [...line1.reverse(), [row, col], ...line2];
 
-  let diagonalDownRight = checkLine(row, col, marker, 1, 1);
-  let diagonalUpLeft = checkLine(row, col, marker, -1, -1);
-  let totalDiagonal = diagonalDownRight.count + diagonalUpLeft.count - 1;
-  let diagonalBlockedEnds =
-    diagonalDownRight.blockedEnds + diagonalUpLeft.blockedEnds;
-  if (totalDiagonal >= 5 && diagonalBlockedEnds < 2) return true;
+    const blockedEnds = line1.blocked + line2.blocked;
+    if (combined.length >= 5 && blockedEnds < 2) {
+      return combined; // return winning line
+    }
+  }
 
-  let diagonalDownLeft = checkLine(row, col, marker, 1, -1);
-  let diagonalUpRight = checkLine(row, col, marker, -1, 1);
-  let totalAntiDiagonal = diagonalDownLeft.count + diagonalUpRight.count - 1;
-  let antiDiagonalBlockedEnds =
-    diagonalDownLeft.blockedEnds + diagonalUpRight.blockedEnds;
-  if (totalAntiDiagonal >= 5 && antiDiagonalBlockedEnds < 2) return true;
+  return null;
+}
 
-  return false;
+function getLine(row, col, marker, dx, dy) {
+  const positions = [];
+  let blocked = 0;
+  const oppositeMarker =
+    marker === game.players.player1Choice
+      ? game.players.player2Choice
+      : game.players.player1Choice;
+
+  while (true) {
+    row += dx;
+    col += dy;
+    if (!isValidPosition(row, col)) break;
+    if (game.board[row][col] === marker) {
+      positions.push([row, col]);
+    } else {
+      if (game.board[row][col] === oppositeMarker) blocked++;
+      break;
+    }
+  }
+
+  positions.blocked = blocked;
+  return positions;
 }
 
 function checkLine(row, col, marker, dx, dy) {

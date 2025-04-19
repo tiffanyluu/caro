@@ -1,10 +1,8 @@
 import { setCoords, resetGame, makeMove, game } from "./gameLogic.js";
 import { makeSimulatedMove } from "./ai.js";
 
-let isPlayerVsAI = false;
-
 function toggleGameMode(mode) {
-  isPlayerVsAI = mode === "AI";
+  game.isPlayerVsAI = mode === "AI";
   resetGame();
   initializeBoard();
 }
@@ -75,6 +73,13 @@ function createEndingContent(message) {
   endingContainer.classList.add("show");
 }
 
+function highlightWinningLine(line) {
+  line.forEach(([row, col]) => {
+    const cell = document.querySelector(`.cell-${row}${col}`);
+    cell.classList.add("winning-glow");
+  });
+}
+
 function showWinningScreen(winner) {
   setTimeout(() => {
     let message = `${winner} is the winner!`;
@@ -94,7 +99,7 @@ function updateCell(row, col, marker) {
 }
 
 function handleCellClick() {
-  const marker = isPlayerVsAI ? "X" : undefined;
+  const marker = game.isPlayerVsAI ? "X" : undefined;
   const result = makeMove(undefined, undefined, marker);
 
   if (!result.success) {
@@ -108,10 +113,11 @@ function handleCellClick() {
     if (result.isDraw) {
       showDrawScreen();
     } else {
-      showWinningScreen(result.winner);
+      highlightWinningLine(result.winningLine);
+      setTimeout(() => showWinningScreen(result.winner), 1000);
     }
   } else {
-    if (isPlayerVsAI) {
+    if (game.isPlayerVsAI) {
       setTimeout(() => aiMove(result.currentBoard), 500);
     }
   }
@@ -132,7 +138,8 @@ function aiMove(currentBoard) {
         if (result.isDraw) {
           showDrawScreen();
         } else {
-          showWinningScreen(result.winner);
+          highlightWinningLine(result.winningLine);
+          setTimeout(() => showWinningScreen(result.winner), 1000);
         }
       }
     }
