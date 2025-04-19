@@ -7,7 +7,8 @@ An important feature of **Caro** states that the winning line must not be blocke
 <p align="center">
   <img src="./src/assets/caro.png"/>
 </p>
-Background Image Credit: [Lukas Blazek @goumbik on Unsplash](https://unsplash.com/@goumbik)
+
+Background Image Credit: [Lukas Blazek](https://unsplash.com/@goumbik)
 
 ## Features
 
