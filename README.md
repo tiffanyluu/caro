@@ -10,13 +10,15 @@ An important feature of **Caro** states that the winning line must not be blocke
 
 Background Image Credit: [Lukas Blazek](https://unsplash.com/@goumbik)
 
-## Features
+## Live Demo: [Caro](https://tiffanyluu.github.io/caro/)
+
+Features
 
 - **Responsive grid**
 - **Two-player mode**
 - **AI opponent**: Challenge an AI using the **Minimax** algorithm with **Alpha-Beta Pruning**.
 
-## How to Play
+How to Play
 
 1. The game starts with an empty grid.
 2. Players take turns placing their marks (`X` or `O`) on the grid.
