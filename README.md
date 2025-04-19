@@ -14,7 +14,7 @@ Background Image Credit: [Lukas Blazek](https://unsplash.com/@goumbik)
 
 - **Responsive grid**
 - **Two-player mode**
-- **AI opponent**: Challenge an AI using the **Minimax** algorithm with **Alpha-Beta Pruning**. (In Progress)
+- **AI opponent**: Challenge an AI using the **Minimax** algorithm with **Alpha-Beta Pruning**.
 
 ## How to Play
 
