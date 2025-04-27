@@ -75,8 +75,14 @@ function createEndingContent(message) {
 
 function highlightWinningLine(line) {
   line.forEach(([row, col]) => {
-    const cell = document.querySelector(`.cell-${row}${col}`);
-    cell.classList.add("winning-glow");
+    const formattedRow = String(row).padStart(2, "0");
+    const formattedCol = String(col).padStart(2, "0");
+    const cell = document.querySelector(
+      `.cell-${formattedRow}-${formattedCol}`
+    );
+    if (cell) {
+      cell.classList.add("winning-glow");
+    }
   });
 }
 
@@ -93,9 +99,13 @@ function showDrawScreen() {
 }
 
 function updateCell(row, col, marker) {
-  let cell = document.querySelector(`.cell-${row}${col}`);
-  cell.textContent = marker;
-  cell.classList.add(marker);
+  const formattedRow = String(row).padStart(2, "0");
+  const formattedCol = String(col).padStart(2, "0");
+  let cell = document.querySelector(`.cell-${formattedRow}-${formattedCol}`);
+  if (cell) {
+    cell.textContent = marker;
+    cell.classList.add(marker);
+  }
 }
 
 function handleCellClick() {
@@ -166,8 +176,10 @@ function initializeBoard() {
 
   for (let i = 0; i < 15; i++) {
     for (let j = 0; j < 15; j++) {
+      const formattedRow = String(i).padStart(2, "0");
+      const formattedCol = String(j).padStart(2, "0");
       const cell = document.createElement("div");
-      cell.className = `cell cell-${i}${j}`;
+      cell.className = `cell cell-${formattedRow}-${formattedCol}`;
       cell.dataset.row = i;
       cell.dataset.col = j;
 

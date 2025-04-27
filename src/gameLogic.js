@@ -81,37 +81,6 @@ function makeMove(row, col, playerMarker) {
   };
 }
 
-// function checkState(row, col, marker) {
-//   let horizontalLeft = checkLine(row, col, marker, -1, 0);
-//   let horizontalRight = checkLine(row, col, marker, 1, 0);
-//   let totalHorizontal = horizontalLeft.count + horizontalRight.count - 1;
-//   let horizontalBlockedEnds =
-//     horizontalLeft.blockedEnds + horizontalRight.blockedEnds;
-//   if (totalHorizontal >= 5 && horizontalBlockedEnds < 2) return true;
-
-//   let verticalDown = checkLine(row, col, marker, 0, 1);
-//   let verticalUp = checkLine(row, col, marker, 0, -1);
-//   let totalVertical = verticalDown.count + verticalUp.count - 1;
-//   let verticalBlockedEnds = verticalDown.blockedEnds + verticalUp.blockedEnds;
-//   if (totalVertical >= 5 && verticalBlockedEnds < 2) return true;
-
-//   let diagonalDownRight = checkLine(row, col, marker, 1, 1);
-//   let diagonalUpLeft = checkLine(row, col, marker, -1, -1);
-//   let totalDiagonal = diagonalDownRight.count + diagonalUpLeft.count - 1;
-//   let diagonalBlockedEnds =
-//     diagonalDownRight.blockedEnds + diagonalUpLeft.blockedEnds;
-//   if (totalDiagonal >= 5 && diagonalBlockedEnds < 2) return true;
-
-//   let diagonalDownLeft = checkLine(row, col, marker, 1, -1);
-//   let diagonalUpRight = checkLine(row, col, marker, -1, 1);
-//   let totalAntiDiagonal = diagonalDownLeft.count + diagonalUpRight.count - 1;
-//   let antiDiagonalBlockedEnds =
-//     diagonalDownLeft.blockedEnds + diagonalUpRight.blockedEnds;
-//   if (totalAntiDiagonal >= 5 && antiDiagonalBlockedEnds < 2) return true;
-
-//   return false;
-// }
-
 function checkState(row, col, marker) {
   const directions = [
     { dx: -1, dy: 0 }, // left
